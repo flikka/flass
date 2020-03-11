@@ -79,7 +79,7 @@ def get_fashion_train_test():
     return data
 
 
-def train(x, y, batch_size=256):
+def train(x, y, batch_size, epochs):
     pipeline_steps = preprocessing_pipeline().steps
     convolutional_model = conv_model()
     convolutional_model.summary()
@@ -91,7 +91,7 @@ def train(x, y, batch_size=256):
     )
     pipeline_steps.append(("model", conv_model()))
     full_pipeline = Pipeline(steps=pipeline_steps)
-    full_pipeline.fit(x, y, model__batch_size=batch_size)
+    full_pipeline.fit(x, y, model__batch_size=batch_size, model__epochs=epochs)
     return full_pipeline
 
 
