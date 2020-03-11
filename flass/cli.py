@@ -11,7 +11,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-@click.option("--plot/--no-noplot", default=False)
+@click.option("--plot/--no-plot", default=False)
 @click.option("--batch-size", default=256)
 @click.option("--epochs", default=3)
 @click.command()
