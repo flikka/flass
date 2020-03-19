@@ -115,12 +115,6 @@ def train(x, y, batch_size, epochs):
     pipeline_steps = preprocessing_pipeline().steps
     convolutional_model = conv_model()
     convolutional_model.summary()
-    tf.keras.utils.plot_model(
-        convolutional_model,
-        to_file="../model.png",
-        show_shapes=True,
-        show_layer_names=True,
-    )
     pipeline_steps.append(("model", conv_model()))
     full_pipeline = Pipeline(steps=pipeline_steps)
     full_pipeline.fit(x, y, model__batch_size=batch_size, model__epochs=epochs)
