@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 @click.option("--batch-size", default=256)
 @click.option("--epochs", default=3)
 @click.option(
-    "--dataset", default="fashion", required=True, help="Choose between \{fashion\}"
+    "--dataset", required=True, help="Choose between {fashion, mnist}"
 )
 @click.command()
 def flass(plot, batch_size, epochs, dataset):
