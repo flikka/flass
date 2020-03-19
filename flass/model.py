@@ -72,11 +72,43 @@ def conv_model():
     return model
 
 
-def get_fashion_train_test():
+def get_data(data_key):
+    logger.info(f"Using {data_key} dataset")
+    if data_key == "fashion":
+        return get_fashion_data()
+    elif data_key == "mnist":
+        return get_mnist_data()
+    else:
+        raise ValueError(f"Unsupported value for 'data_key': {data_key}")
+
+
+def get_mnist_data():
+    logger.info("Downloading MNIST dataset")
+    data = tf.keras.datasets.mnist.load_data()
+    logger.info("Done downloading MNIST dataset")
+    # Map for human readable class names
+    class_names = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    return data, class_names
+
+
+def get_fashion_data():
     logger.info("Downloading Fashion dataset")
     data = tf.keras.datasets.fashion_mnist.load_data()
     logger.info("Done downloading Fashion dataset")
-    return data
+    # Map for human readable class names
+    class_names = [
+        "T-shirt/top",
+        "Trouser",
+        "Pullover",
+        "Dress",
+        "Coat",
+        "Sandal",
+        "Shirt",
+        "Sneaker",
+        "Bag",
+        "Ankle boot",
+    ]
+    return data, class_names
 
 
 def train(x, y, batch_size, epochs):

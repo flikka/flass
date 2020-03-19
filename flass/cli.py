@@ -5,7 +5,7 @@ import click
 import numpy as np
 import mlflow
 from sklearn.metrics import roc_auc_score, classification_report
-from flass.model import train, get_fashion_train_test, plot_incorrect
+from flass.model import train, get_data, plot_incorrect
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -14,28 +14,19 @@ logger = logging.getLogger(__name__)
 @click.option("--plot/--no-plot", default=False)
 @click.option("--batch-size", default=256)
 @click.option("--epochs", default=3)
+@click.option(
+    "--dataset", default="fashion", required=True, help="Choose between \{fashion\}"
+)
 @click.command()
-def flass(plot, batch_size, epochs):
-    # Map for human readable class names
-    class_names = [
-        "T-shirt/top",
-        "Trouser",
-        "Pullover",
-        "Dress",
-        "Coat",
-        "Sandal",
-        "Shirt",
-        "Sneaker",
-        "Bag",
-        "Ankle boot",
-    ]
-
+def flass(plot, batch_size, epochs, dataset):
     logger.info("Obtaining data")
-    (x_train, y_train), (x_test, y_test) = get_fashion_train_test()
+    data, class_names = get_data(dataset)
+
+    (x_train, y_train), (x_test, y_test) = data
     x_train = np.expand_dims(x_train, -1)
     x_test = np.expand_dims(x_test, -1)
 
-    with mlflow.start_run():
+    with mlflow.start_run(run_name=dataset):
         mlflow.log_param("batch_size", batch_size)
         mlflow.log_param("epochs", epochs)
         mlflow.log_param("num_train_instances", len(x_train))
