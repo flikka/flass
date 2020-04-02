@@ -4,6 +4,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 
@@ -115,7 +116,7 @@ def train(x, y, batch_size, epochs):
     pipeline_steps = preprocessing_pipeline().steps
     convolutional_model = conv_model()
     convolutional_model.summary()
-    pipeline_steps.append(("model", conv_model()))
+    pipeline_steps.append(("model", convolutional_model))
     full_pipeline = Pipeline(steps=pipeline_steps)
     full_pipeline.fit(x, y, model__batch_size=batch_size, model__epochs=epochs)
     return full_pipeline
