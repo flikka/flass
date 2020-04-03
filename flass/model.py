@@ -73,14 +73,22 @@ def conv_model():
     return model
 
 
-def get_data(data_key):
-    logger.info(f"Using {data_key} dataset")
+def get_data(data_key, subset=-1):
+    logger.info(f"Using {data_key} dataset, reducing training set to {subset} elements")
     if data_key == "fashion":
-        return get_fashion_data()
+        data_classes = get_fashion_data()
     elif data_key == "mnist":
-        return get_mnist_data()
+        data_classes = get_mnist_data()
     else:
         raise ValueError(f"Unsupported value for 'data_key': {data_key}")
+    if subset != -1:
+        ((x_train, y_train), (x_test, y_test)), class_names = data_classes
+
+        x_train = x_train[:subset]
+        y_train = y_train[:subset]
+        data_classes = ((x_train, y_train), (x_test, y_test)), class_names
+
+    return data_classes
 
 
 def get_mnist_data():

@@ -22,10 +22,12 @@ logger = logging.getLogger(__name__)
 @click.option("--epochs", default=3)
 @click.option("--dataset", required=True, help="Choose between {fashion, mnist}")
 @click.option("--model-type", required=False, default="kerasconv")
+@click.option("--subset", required=False, default=-1)
 @click.command()
-def flass(plot, batch_size, epochs, dataset, model_type):
+def flass(plot, batch_size, epochs, dataset, model_type, subset):
     logger.info("Obtaining data")
-    data, class_names = get_data(dataset)
+    data, class_names = get_data(dataset, subset)
+
     azureml_experiment = setup_azureml(experiment_name=dataset)
 
     (x_train, y_train), (x_test, y_test) = data
