@@ -39,7 +39,15 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset):
         run.log("batch_size", batch_size)
         run.log("epochs", epochs)
         run.log("num_train_instances", len(x_train))
-        trained_pipeline = train(x_train, y_train, batch_size=batch_size, epochs=epochs)
+        run.log("ml_method", model_type)
+
+        trained_pipeline = train(
+            x_train,
+            y_train,
+            batch_size=batch_size,
+            epochs=epochs,
+            model_type=model_type,
+        )
 
         if model_type != "kerasconv":
             joblib.dump(value=trained_pipeline, filename="model.pkl")
@@ -51,6 +59,12 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset):
             y_predicted = predicted_y_probabilities.argmax(axis=-1)
         else:
             y_predicted = (predicted_y_probabilities > 0.5).astype("int32")
+
+        matching_predictions = (y_predicted == y_test).tolist()
+        correct = matching_predictions.count(True)
+        incorrect = matching_predictions.count(False)
+        run.log("correct_count", correct)
+        run.log("incorrect_count", incorrect)
 
         report = classification_report(
             y_test, y_predicted, target_names=class_names, output_dict=True

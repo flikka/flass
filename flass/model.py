@@ -7,6 +7,7 @@ import tensorflow as tf
 
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import svm
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 logger = logging.getLogger()
@@ -21,9 +22,24 @@ class BitScaler(BaseEstimator, TransformerMixin):
         return X
 
 
+class ImageFlattener(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None):
+        n_samples = len(X)
+        return X.reshape((n_samples, -1))
+
+
 def preprocessing_pipeline():
     preprocessing = Pipeline([("bitscaler", BitScaler())])
     return preprocessing
+
+
+def svm_model():
+    model = svm.SVC(probability=True)
+    model.predict = model.predict_proba
+    return model
 
 
 def conv_model():
@@ -120,14 +136,25 @@ def get_fashion_data():
     return data, class_names
 
 
-def train(x, y, batch_size, epochs):
+def train(x, y, batch_size, epochs, model_type):
+    logger.info(f"Starting to build {model_type} model")
     pipeline_steps = preprocessing_pipeline().steps
-    convolutional_model = conv_model()
-    convolutional_model.summary()
-    pipeline_steps.append(("model", convolutional_model))
-    full_pipeline = Pipeline(steps=pipeline_steps)
-    full_pipeline.fit(x, y, model__batch_size=batch_size, model__epochs=epochs)
-    return full_pipeline
+
+    if model_type == "kerasconv":
+        model = conv_model()
+        model.summary()
+        pipeline_steps.append(("model", model))
+        full_pipeline = Pipeline(steps=pipeline_steps)
+        full_pipeline.fit(x, y, model__batch_size=batch_size, model__epochs=epochs)
+        return full_pipeline
+
+    elif model_type == "svm":
+        pipeline_steps.append(("image_flattener", ImageFlattener()))
+        model = svm_model()
+        pipeline_steps.append(("model", model))
+        full_pipeline = Pipeline(steps=pipeline_steps)
+        full_pipeline.fit(x, y)
+        return full_pipeline
 
 
 def plot_incorrect(x_test, y_test, y_predicted, class_names):
