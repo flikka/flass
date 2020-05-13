@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn import svm
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 logger = logging.getLogger()
@@ -20,9 +21,24 @@ class BitScaler(BaseEstimator, TransformerMixin):
         return X
 
 
+class ImageFlattener(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X, y=None):
+        n_samples = len(X)
+        return X.reshape((n_samples, -1))
+
+
 def preprocessing_pipeline():
     preprocessing = Pipeline([("bitscaler", BitScaler())])
     return preprocessing
+
+
+def svm_model():
+    model = svm.SVC(probability=True)
+    model.predict = model.predict_proba
+    return model
 
 
 def conv_model():
@@ -72,14 +88,22 @@ def conv_model():
     return model
 
 
-def get_data(data_key):
-    logger.info(f"Using {data_key} dataset")
+def get_data(data_key, subset=-1):
+    logger.info(f"Using {data_key} dataset, reducing training set to {subset} elements")
     if data_key == "fashion":
-        return get_fashion_data()
+        data_classes = get_fashion_data()
     elif data_key == "mnist":
-        return get_mnist_data()
+        data_classes = get_mnist_data()
     else:
         raise ValueError(f"Unsupported value for 'data_key': {data_key}")
+    if subset != -1:
+        ((x_train, y_train), (x_test, y_test)), class_names = data_classes
+
+        x_train = x_train[:subset]
+        y_train = y_train[:subset]
+        data_classes = ((x_train, y_train), (x_test, y_test)), class_names
+
+    return data_classes
 
 
 def get_mnist_data():
@@ -111,14 +135,24 @@ def get_fashion_data():
     return data, class_names
 
 
-def train(x, y, batch_size, epochs):
+def train(x, y, batch_size, epochs, model_type):
+    logger.info(f"Starting to build {model_type} model")
     pipeline_steps = preprocessing_pipeline().steps
-    convolutional_model = conv_model()
-    convolutional_model.summary()
-    pipeline_steps.append(("model", conv_model()))
-    full_pipeline = Pipeline(steps=pipeline_steps)
-    full_pipeline.fit(x, y, model__batch_size=batch_size, model__epochs=epochs)
-    return full_pipeline
+    if model_type == "kerasconv":
+        model = conv_model()
+        model.summary()
+        pipeline_steps.append(("model", model))
+        full_pipeline = Pipeline(steps=pipeline_steps)
+        full_pipeline.fit(x, y, model__batch_size=batch_size, model__epochs=epochs)
+        return full_pipeline
+
+    elif model_type == "svm":
+        pipeline_steps.append(("image_flattener", ImageFlattener()))
+        model = svm_model()
+        pipeline_steps.append(("model", model))
+        full_pipeline = Pipeline(steps=pipeline_steps)
+        full_pipeline.fit(x, y)
+        return full_pipeline
 
 
 def plot_incorrect(x_test, y_test, y_predicted, class_names):
