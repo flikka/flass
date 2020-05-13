@@ -12,6 +12,7 @@ setup(
         "click",
         "graphviz",
         "matplotlib",
+        "mlflow",
         "numpy",
         "pandas",
         "pydot",

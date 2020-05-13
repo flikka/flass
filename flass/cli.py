@@ -8,10 +8,9 @@ from azureml.core.compute import ComputeTarget
 
 import click
 import numpy as np
+import mlflow
 from sklearn.metrics import roc_auc_score, classification_report
-from sklearn.externals import joblib
 from flass.model import train, get_data, plot_incorrect
-
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,19 +27,15 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset):
     logger.info("Obtaining data")
     data, class_names = get_data(dataset, subset)
 
-    azureml_experiment = setup_azureml(experiment_name=dataset)
-
     (x_train, y_train), (x_test, y_test) = data
     x_train = np.expand_dims(x_train, -1)
     x_test = np.expand_dims(x_test, -1)
 
-    with azureml_experiment.start_logging() as run:
-        run.log("batch_size", batch_size)
-        run.log("batch_size", batch_size)
-        run.log("epochs", epochs)
-        run.log("num_train_instances", len(x_train))
-        run.log("ml_method", model_type)
-
+    with mlflow.start_run(run_name=dataset):
+        mlflow.log_param("batch_size", batch_size)
+        mlflow.log_param("epochs", epochs)
+        mlflow.log_param("num_train_instances", len(x_train))
+        mlflow.log_param("ml_method", model_type)
         trained_pipeline = train(
             x_train,
             y_train,
@@ -49,12 +44,9 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset):
             model_type=model_type,
         )
 
-        if model_type != "kerasconv":
-            joblib.dump(value=trained_pipeline, filename="model.pkl")
-
         predicted_y_probabilities = trained_pipeline.predict(x_test)
         roc_auc = roc_auc_score(y_test, predicted_y_probabilities, multi_class="ovr")
-        run.log("AUC", roc_auc)
+        mlflow.log_metric("AUC", roc_auc)
         if predicted_y_probabilities.shape[-1] > 1:
             y_predicted = predicted_y_probabilities.argmax(axis=-1)
         else:
@@ -63,8 +55,8 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset):
         matching_predictions = (y_predicted == y_test).tolist()
         correct = matching_predictions.count(True)
         incorrect = matching_predictions.count(False)
-        run.log("correct_count", correct)
-        run.log("incorrect_count", incorrect)
+        mlflow.log_metric("correct_count", correct)
+        mlflow.log_metric("incorrect_count", incorrect)
 
         report = classification_report(
             y_test, y_predicted, target_names=class_names, output_dict=True
@@ -72,20 +64,19 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset):
         for key in report.keys():
             if type(report[key]) == dict:
                 for metric in report[key].keys():
-                    run.log(f"{key}-{metric}", report[key][metric])
+                    mlflow.log_metric(f"{key}-{metric}", report[key][metric])
             else:
-                run.log(f"{key}", report[key])
+                mlflow.log_metric(f"{key}", report[key])
 
-        if plot:
-            plot_incorrect(x_test, y_test, y_predicted, class_names)
+    if plot:
+        plot_incorrect(x_test, y_test, y_predicted, class_names)
 
 
 def setup_azureml(experiment_name: str):
     # Using a config that must be put in one of the places it will be found (eg. project root?)
     ws = Workspace.from_config()
     exp = Experiment(workspace=ws, name=experiment_name)
-    setup_compute(ws)
-    return exp
+    setup_compute()
 
 
 def setup_compute(ws):

@@ -4,7 +4,6 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn import svm
@@ -139,7 +138,6 @@ def get_fashion_data():
 def train(x, y, batch_size, epochs, model_type):
     logger.info(f"Starting to build {model_type} model")
     pipeline_steps = preprocessing_pipeline().steps
-
     if model_type == "kerasconv":
         model = conv_model()
         model.summary()
