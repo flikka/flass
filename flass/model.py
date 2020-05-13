@@ -4,22 +4,13 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+from skimage.color import gray2rgb
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn import svm
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 logger = logging.getLogger()
-
-
-class BitScaler(BaseEstimator, TransformerMixin):
-    def fit(self, X, y=None):
-        return self
-
-    def transform(self, X, y=None):
-        X = X / 255
-        return X
-
 
 class ImageFlattener(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
@@ -28,11 +19,6 @@ class ImageFlattener(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         n_samples = len(X)
         return X.reshape((n_samples, -1))
-
-
-def preprocessing_pipeline():
-    preprocessing = Pipeline([("bitscaler", BitScaler())])
-    return preprocessing
 
 
 def svm_model():
@@ -52,7 +38,7 @@ def conv_model():
             strides=(1, 1),
             padding="valid",
             activation="relu",
-            input_shape=(28, 28, 1),  # All important images are 28 pixels
+            input_shape=(28, 28, 3),  # All important images are 28 pixels
         )
     )
 
@@ -96,13 +82,17 @@ def get_data(data_key, subset=-1):
         data_classes = get_mnist_data()
     else:
         raise ValueError(f"Unsupported value for 'data_key': {data_key}")
-    if subset != -1:
-        ((x_train, y_train), (x_test, y_test)), class_names = data_classes
 
+    ((x_train, y_train), (x_test, y_test)), class_names = data_classes
+
+    x_train = np.array([gray2rgb(grayimg) for grayimg in x_train])
+    x_test = np.array([gray2rgb(grayimg) for grayimg in x_test])
+
+    if subset != -1:
         x_train = x_train[:subset]
         y_train = y_train[:subset]
-        data_classes = ((x_train, y_train), (x_test, y_test)), class_names
 
+    data_classes = ((x_train, y_train), (x_test, y_test)), class_names
     return data_classes
 
 
@@ -137,17 +127,16 @@ def get_fashion_data():
 
 def train(x, y, batch_size, epochs, model_type):
     logger.info(f"Starting to build {model_type} model")
-    pipeline_steps = preprocessing_pipeline().steps
     if model_type == "kerasconv":
         model = conv_model()
         model.summary()
-        pipeline_steps.append(("model", model))
+        pipeline_steps = [("model", model)]
         full_pipeline = Pipeline(steps=pipeline_steps)
         full_pipeline.fit(x, y, model__batch_size=batch_size, model__epochs=epochs)
         return full_pipeline
 
     elif model_type == "svm":
-        pipeline_steps.append(("image_flattener", ImageFlattener()))
+        pipeline_steps = [("image_flattener", ImageFlattener())]
         model = svm_model()
         pipeline_steps.append(("model", model))
         full_pipeline = Pipeline(steps=pipeline_steps)
