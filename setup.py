@@ -18,8 +18,6 @@ setup(
         "pydot",
         "sklearn",
         "tensorflow",
-        "azureml",
-        "azureml-core",
     ],
     description="Train Keras Convolutional Neural Network for image classification",
     long_description="Train Keras Convolutional Neural Network for image classification",
