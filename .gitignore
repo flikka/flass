@@ -1,0 +1,4 @@
+*mlruns/
+/flass.egg-info/
+/.idea/
+*__pycache__/
