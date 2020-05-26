@@ -18,6 +18,7 @@ setup(
         "pydot",
         "sklearn",
         "tensorflow",
+        "pytest",
     ],
     description="Train Keras Convolutional Neural Network for image classification",
     long_description="Train Keras Convolutional Neural Network for image classification",
