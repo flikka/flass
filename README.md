@@ -1,3 +1,5 @@
+![](https://github.com/flikka/flass/workflows/Flass%20CI/badge.svg)
+
 # So, you want flass?
 
 Flass is great.
