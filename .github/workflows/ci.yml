@@ -1,4 +1,4 @@
-name: Flass CI pipeline
+name: Flass CI
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Flass Install and Test
+    name: Install and Test
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
@@ -26,6 +26,6 @@ jobs:
     - name: Install package
       run: |
         pip --version
-        python setup.py install
+        pip install -r requirements.txt
     - name: Run tests
       run: pytest
