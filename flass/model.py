@@ -12,6 +12,7 @@ from sklearn import svm
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 logger = logging.getLogger()
 
+
 class ImageFlattener(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         return self
