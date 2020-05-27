@@ -106,10 +106,7 @@ def limeify(image_to_explain, trained_pipeline, class_names):
     )
     logger.info("Done with a LIME")
     temp, mask = explanation.get_image_and_mask(
-        explanation.top_labels[0],
-        positive_only=False,
-        num_features=5,
-        hide_rest=False,
+        explanation.top_labels[0], positive_only=False, num_features=5, hide_rest=False
     )
     plt.imshow(mark_boundaries(temp, mask))
     plt.show()

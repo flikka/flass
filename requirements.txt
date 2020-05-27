@@ -1,0 +1,10 @@
+click
+graphviz
+matplotlib
+mlflow
+numpy
+pandas
+pydot
+sklearn
+scikit-image
+tensorflow
