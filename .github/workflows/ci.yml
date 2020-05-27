@@ -10,11 +10,13 @@ on:
 
 jobs:
   build:
+    name: Flass Install and Test
+    runs-on: ${{matrix.os}}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [ubuntu-latest]
         python-version: [3.7]
-      runs-on: ${{matrix.os}}
+
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{matrix.python-version}}
