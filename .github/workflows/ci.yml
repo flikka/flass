@@ -27,8 +27,11 @@ jobs:
       run: |
         pip --version
         pip install --upgrade pip
-        pip install wheel
-        pip install -r requirements.txt
+        pip install .
+    - name: Check formatting
+      run: |
+        pip install black
+        black flass tests
     - name: Run tests
       run: |
         pip install pytest
