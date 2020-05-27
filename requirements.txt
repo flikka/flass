@@ -6,4 +6,5 @@ numpy
 pandas
 pydot
 sklearn
+scikit-image
 tensorflow
