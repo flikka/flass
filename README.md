@@ -1,4 +1,5 @@
 ![](https://github.com/flikka/flass/workflows/Flass%20CI/badge.svg)
+![](https://github.com/flikka/flass/workflows/Flass%20PyPI/badge.svg)
 
 # So, you want flass?
 
