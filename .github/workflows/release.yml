@@ -2,6 +2,7 @@ name: Flass PyPI
 
 on:
   release:
+    types: [published]
 
 jobs:
   publish-to-pypi:
