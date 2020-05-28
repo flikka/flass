@@ -20,11 +20,12 @@ setup(
         "scikit-image",
         "tensorflow",
     ],
+    setup_requires=["wheel"],
     description="Train Keras Convolutional Neural Network for image classification",
     long_description="Train Keras Convolutional Neural Network for image classification",
     entry_points={"console_scripts": ["flass=flass.cli:flass"]},
     packages=["flass"],
     license="MIT",
     url="http://flikka.net",
-    version="0.1.0",
+    version="0.1.1",
 )
