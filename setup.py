@@ -11,7 +11,6 @@ setup(
     install_requires=[
         "click",
         "graphviz",
-        "lime",
         "matplotlib",
         "mlflow",
         "numpy",
@@ -22,6 +21,9 @@ setup(
         "tensorflow",
     ],
     setup_requires=["wheel", "setuptools"],
+    extras_require={
+        "lime": ["lime"]
+    },
     description="Train Keras Convolutional Neural Network for image classification",
     long_description="Train Keras Convolutional Neural Network for image classification",
     entry_points={"console_scripts": ["flass=flass.cli:flass"]},
