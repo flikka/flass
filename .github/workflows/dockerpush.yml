@@ -1,0 +1,22 @@
+name: Dockerhub
+
+on:
+  push:
+    branches:
+      - master
+  release:
+    types: [published]
+
+jobs:
+  docker-push:
+    name: Build and push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: build-and-push
+        uses: docker/build-push-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PWD }}
+          repository: kminaister/flass
+          tag_with_ref: true
