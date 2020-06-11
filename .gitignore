@@ -1,3 +1,7 @@
+.eggs/
+build/
+dist/
+venv/
 *mlruns/
 /flass.egg-info/
 /.idea/
