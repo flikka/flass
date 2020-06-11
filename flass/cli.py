@@ -4,8 +4,14 @@ import random
 import sys
 
 import click
-from lime import lime_image
-from lime.wrappers.scikit_image import SegmentationAlgorithm
+
+try:
+    from lime import lime_image
+    from lime.wrappers.scikit_image import SegmentationAlgorithm
+
+except ImportError:
+    logging.warn("Dependency lime not found, please install with [lime] to enable")
+
 import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
