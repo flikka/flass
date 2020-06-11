@@ -6,11 +6,12 @@ setup(
     author_email="kristian.flikka@gmail.com",
     classifiers=[
         "Intended Audience :: Developers",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     install_requires=[
         "click",
         "graphviz",
+        "lime",
         "matplotlib",
         "mlflow",
         "numpy",
@@ -20,7 +21,7 @@ setup(
         "scikit-image",
         "tensorflow",
     ],
-    setup_requires=["wheel"],
+    setup_requires=["wheel", "setuptools"],
     description="Train Keras Convolutional Neural Network for image classification",
     long_description="Train Keras Convolutional Neural Network for image classification",
     entry_points={"console_scripts": ["flass=flass.cli:flass"]},

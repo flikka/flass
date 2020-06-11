@@ -1,5 +1,6 @@
 click
 graphviz
+lime
 matplotlib
 mlflow
 numpy
