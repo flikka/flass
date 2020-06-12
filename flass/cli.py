@@ -1,7 +1,15 @@
 import logging
+import sys
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
 from pprint import pformat
 import random
-import sys
 
 import click
 
@@ -20,13 +28,6 @@ from sklearn.metrics import roc_auc_score, classification_report
 
 from flass.model import train, get_data, plot_incorrect
 
-logging.basicConfig(
-    stream=sys.stdout,
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)-8s %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-logger = logging.getLogger(__name__)
 
 
 @click.option("--plot/--no-plot", default=False)
@@ -65,6 +66,7 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset, lime):
         predicted_y_probabilities = trained_pipeline.predict(x_test)
         roc_auc = roc_auc_score(y_test, predicted_y_probabilities, multi_class="ovr")
         mlflow.log_metric("AUC", roc_auc)
+        logger.info(f"AUC: {roc_auc}")
         if predicted_y_probabilities.shape[-1] > 1:
             y_predicted = predicted_y_probabilities.argmax(axis=-1)
         else:
@@ -74,7 +76,10 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset, lime):
         correct = matching_predictions.count(True)
         incorrect = matching_predictions.count(False)
         mlflow.log_metric("correct_count", correct)
+        logger.info(f"Correct predictions: {correct}")
         mlflow.log_metric("incorrect_count", incorrect)
+        logger.info(f"Incorrect classifications: {incorrect}")
+        logger.info("See MLFlow for more details from run")
 
         report = classification_report(
             y_test, y_predicted, target_names=class_names, output_dict=True
