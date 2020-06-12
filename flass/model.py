@@ -10,7 +10,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn import svm
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 class ImageFlattener(BaseEstimator, TransformerMixin):

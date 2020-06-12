@@ -1,24 +1,8 @@
 import logging
-import sys
-logging.basicConfig(
-    stream=sys.stdout,
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)-8s %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-logger = logging.getLogger(__name__)
-
 from pprint import pformat
 import random
-
+import sys
 import click
-
-try:
-    from lime import lime_image
-    from lime.wrappers.scikit_image import SegmentationAlgorithm
-
-except ImportError:
-    logging.warn("Dependency lime not found, please install with [lime] to enable")
 
 import matplotlib.pyplot as plt
 import mlflow
@@ -28,6 +12,20 @@ from sklearn.metrics import roc_auc_score, classification_report
 
 from flass.model import train, get_data, plot_incorrect
 
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format="%(asctime)s %(name)s %(levelname)-2s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
+logger = logging.getLogger(__name__)
+
+try:
+    from lime import lime_image
+    from lime.wrappers.scikit_image import SegmentationAlgorithm
+
+except ImportError:
+    logger.warning("Dependency lime not found, please install with [lime] to enable")
 
 
 @click.option("--plot/--no-plot", default=False)
