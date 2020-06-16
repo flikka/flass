@@ -5,7 +5,11 @@ import kfp
 
 @kfp.dsl.pipeline(name="Flass onestep", description="Run the flass in one go")
 def flass_onestep(
-    dataset="mnist", subset=-1, model_type="kerasconv", epochs=3, batch_size=100
+    dataset="mnist",
+    subset: int = -1,
+    model_type="kerasconv",
+    epochs: int = 3,
+    batch_size: int = 100,
 ):
     return kfp.dsl.ContainerOp(
         name="Flass - all in one",
@@ -23,7 +27,9 @@ def flass_onestep(
             "--batch-size",
             batch_size,
         ],
-        output_artifact_paths={"classification-report-json": "/home/appuser/classification_report.json"},
+        output_artifact_paths={
+            "classification-report-json": "/home/appuser/classification_report.json"
+        },
     )
 
 
