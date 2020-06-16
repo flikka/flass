@@ -1,3 +1,4 @@
+import json
 import logging
 from pprint import pformat
 import random
@@ -81,6 +82,12 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset, lime):
 
         report = classification_report(
             y_test, y_predicted, target_names=class_names, output_dict=True
+        )
+        classification_report_file = "classification_report.json"
+        with open(classification_report_file, "w") as file:
+            json.dump(report, file)
+        logger.info(
+            f'Wrote classification report to file "{classification_report_file}"'
         )
         for key in report.keys():
             if type(report[key]) == dict:
