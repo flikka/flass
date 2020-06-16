@@ -14,8 +14,8 @@ def flass_onestep(
     return kfp.dsl.ContainerOp(
         name="Flass - all in one",
         image="docker.io/kminaister/flass:0.1.9",
+        command=["flass"],
         arguments=[
-            "flass",
             "--dataset",
             dataset,
             "--subset",
