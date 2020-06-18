@@ -1,0 +1,11 @@
+name: flass-mlproject
+
+docker_env:
+  image: docker.io/kminaister/flass:latest
+
+entry_points:
+  main:
+    parameters:
+      dataset: string
+      subset: {type: int, default: -1}
+    command: "flass --dataset {dataset} --subset {subset}"

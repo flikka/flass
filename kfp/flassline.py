@@ -28,7 +28,7 @@ def flass_onestep(
             batch_size,
         ],
         output_artifact_paths={
-            "classification-report-json": "/home/appuser/classification_report.json"
+            "classification-report-json": "/tmp/classification_report.json"
         },
     )
 
