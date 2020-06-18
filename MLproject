@@ -8,4 +8,4 @@ entry_points:
     parameters:
       dataset: string
       subset: {type: int, default: -1}
-    command: "python -m cli/flass.py --dataset {dataset} --subset {subset}"
+    command: "flass --dataset {dataset} --subset {subset}"
