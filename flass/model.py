@@ -2,12 +2,15 @@ import logging
 import os
 
 import matplotlib.pyplot as plt
+import mlflow.keras
+import mlflow.sklearn
 import numpy as np
-import tensorflow as tf
+
 from skimage.color import gray2rgb
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn import svm
+import tensorflow as tf
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 logger = logging.getLogger(__name__)
@@ -131,17 +134,16 @@ def train(x, y, batch_size, epochs, model_type):
     if model_type == "kerasconv":
         model = conv_model()
         model.summary()
-        pipeline_steps = [("model", model)]
-        full_pipeline = Pipeline(steps=pipeline_steps)
-        full_pipeline.fit(x, y, model__batch_size=batch_size, model__epochs=epochs)
-        return full_pipeline
-
+        model.fit(x, y, batch_size=batch_size, epochs=epochs)
+        model.log_model = mlflow.keras.log_model
+        return model
     elif model_type == "svm":
         pipeline_steps = [("image_flattener", ImageFlattener())]
         model = svm_model()
         pipeline_steps.append(("model", model))
         full_pipeline = Pipeline(steps=pipeline_steps)
         full_pipeline.fit(x, y)
+        full_pipeline.log_model = mlflow.sklearn.log_model
         return full_pipeline
 
 

@@ -9,6 +9,7 @@ setup(
         "Programming Language :: Python :: 3.8",
     ],
     install_requires=[
+        "azure-storage-blob",
         "click",
         "graphviz",
         "matplotlib",
@@ -21,9 +22,7 @@ setup(
         "tensorflow",
     ],
     setup_requires=["wheel", "setuptools"],
-    extras_require={
-        "lime": ["lime"]
-    },
+    extras_require={"lime": ["lime"]},
     description="Train Keras Convolutional Neural Network for image classification",
     long_description="Train Keras Convolutional Neural Network for image classification",
     entry_points={"console_scripts": ["flass=flass.cli:flass"]},

@@ -7,10 +7,14 @@ import click
 
 import matplotlib.pyplot as plt
 import mlflow
+import mlflow.pyfunc
+import mlflow.keras
+import mlflow.exceptions
+
 import numpy as np
+
 from skimage.segmentation import mark_boundaries
 from sklearn.metrics import roc_auc_score, classification_report
-
 from flass.model import train, get_data, plot_incorrect
 
 logging.basicConfig(
@@ -36,19 +40,22 @@ except ImportError:
 @click.option("--model-type", required=False, default="kerasconv")
 @click.option("--subset", required=False, default=-1)
 @click.option("--lime/--no-lime", default=False)
+@click.option("--run-name", required=False)
 @click.command()
-def flass(plot, batch_size, epochs, dataset, model_type, subset, lime):
+def flass(plot, batch_size, epochs, dataset, model_type, subset, lime, run_name):
     logger.info("Obtaining data")
     data, class_names = get_data(dataset, subset)
 
     (x_train, y_train), (x_test, y_test) = data
 
-    with mlflow.start_run(run_name=dataset):
+    with mlflow.start_run(run_name=run_name):
+        logger.info(f"Artifact URI: {mlflow.get_artifact_uri()}")
+        logger.info(f"Tracking URI: {mlflow.get_tracking_uri()}")
         mlflow.log_param("batch_size", batch_size)
         mlflow.log_param("epochs", epochs)
         mlflow.log_param("num_train_instances", len(x_train))
         mlflow.log_param("ml_method", model_type)
-        trained_pipeline = train(
+        trained_model = train(
             x_train,
             y_train,
             batch_size=batch_size,
@@ -56,13 +63,27 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset, lime):
             model_type=model_type,
         )
 
+        trained_model.log_model(trained_model, "saved-model")
+        model_location = mlflow.get_artifact_uri("saved-model")
+        logger.info(f"Loading model from: {model_location}")
+
+        # The pyfunc flavour of Keras seems to require a Pandas dataframe, but the
+        # Keras flavour (as used when using mlflow.keras) appears to accept the higher
+        # dimensioned numpy input
+        try:
+            loaded_model = mlflow.keras.load_model(model_location)
+            logger.info("Loaded MLFlow model with keras flavour")
+        except mlflow.exceptions.MlflowException:
+            loaded_model = mlflow.pyfunc.load_model(model_location)
+            logger.info("Loaded MLFlow model with pyfunc flavour")
+
         if lime:
             # Do a LIME
             samples = random.sample(range(0, len(x_test)), 10)
             for i in samples:
-                limeify(x_test[i], trained_pipeline, class_names)
+                limeify(x_test[i], loaded_model, class_names)
 
-        predicted_y_probabilities = trained_pipeline.predict(x_test)
+        predicted_y_probabilities = loaded_model.predict(x_test)
         roc_auc = roc_auc_score(y_test, predicted_y_probabilities, multi_class="ovr")
         mlflow.log_metric("AUC", roc_auc)
         logger.info(f"AUC: {roc_auc}")
