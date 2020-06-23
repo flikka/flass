@@ -29,5 +29,5 @@ setup(
     packages=["flass"],
     license="MIT",
     url="http://flikka.net",
-    version="0.1.9",
+    version="0.1.11",
 )
