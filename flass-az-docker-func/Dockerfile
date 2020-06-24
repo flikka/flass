@@ -5,7 +5,11 @@ FROM mcr.microsoft.com/azure-functions/python:2.0-python3.6
 ENV AzureWebJobsScriptRoot=/home/site/wwwroot \
     AzureFunctionsJobHost__Logging__Console__IsEnabled=true
 
-COPY ./flass-az-docker-func/requirements.txt .
-RUN pip install -r requirements.txt
+RUN python -m pip install --upgrade pip
+RUN pip install azure-functions
+
+COPY ./flass/ ./flass/
+COPY ./setup.py .
+RUN python setup.py install
 
 COPY ./flass-az-docker-func /home/site/wwwroot

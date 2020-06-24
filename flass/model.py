@@ -147,6 +147,19 @@ def train(x, y, batch_size, epochs, model_type):
         return full_pipeline
 
 
+def load_mlflow_model(model_location):
+    # The pyfunc flavour of Keras seems to require a Pandas dataframe, but the
+    # Keras flavour (as used when using mlflow.keras) appears to accept the higher
+    # dimensioned numpy input.
+    try:
+        loaded_model = mlflow.keras.load_model(model_location)
+        logger.info("Loaded MLFlow model with keras flavour")
+    except mlflow.exceptions.MlflowException:
+        loaded_model = mlflow.pyfunc.load_model(model_location)
+        logger.info("Loaded MLFlow model with pyfunc flavour")
+    return loaded_model
+
+
 def plot_incorrect(x_test, y_test, y_predicted, class_names):
     incorrect = np.nonzero(y_predicted != y_test)[0]
     # Display the first 16 incorrectly classified images from the test data set

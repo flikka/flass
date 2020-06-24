@@ -1,4 +1,5 @@
 azure-storage-blob
+azure-functions
 click
 graphviz
 matplotlib
