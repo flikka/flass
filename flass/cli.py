@@ -7,15 +7,13 @@ import click
 
 import matplotlib.pyplot as plt
 import mlflow
-import mlflow.pyfunc
-import mlflow.keras
 import mlflow.exceptions
 
 import numpy as np
 
 from skimage.segmentation import mark_boundaries
 from sklearn.metrics import roc_auc_score, classification_report
-from flass.model import train, get_data, plot_incorrect
+from flass.model import train, get_data, plot_incorrect, load_mlflow_model
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -67,15 +65,7 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset, lime, run_name)
         model_location = mlflow.get_artifact_uri("saved-model")
         logger.info(f"Loading model from: {model_location}")
 
-        # The pyfunc flavour of Keras seems to require a Pandas dataframe, but the
-        # Keras flavour (as used when using mlflow.keras) appears to accept the higher
-        # dimensioned numpy input
-        try:
-            loaded_model = mlflow.keras.load_model(model_location)
-            logger.info("Loaded MLFlow model with keras flavour")
-        except mlflow.exceptions.MlflowException:
-            loaded_model = mlflow.pyfunc.load_model(model_location)
-            logger.info("Loaded MLFlow model with pyfunc flavour")
+        loaded_model = load_mlflow_model(model_location)
 
         if lime:
             # Do a LIME
