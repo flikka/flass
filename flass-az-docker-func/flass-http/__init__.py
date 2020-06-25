@@ -7,6 +7,8 @@ from flass.model import load_mlflow_model
 import flass
 import numpy as np
 
+CACHED_MODEL = None
+
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info(f"Flass is at {flass.__file__}")
@@ -20,10 +22,15 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     response += (
         f"Lenght of model storage connection string is {connection_string_length}\n"
     )
-
-    logging.info(f"Loading model from {model_location}")
-    trained_model = load_mlflow_model(model_location)
-    logging.info(f"Model loaded successfully")
+    global CACHED_MODEL
+    if CACHED_MODEL:
+        logging.info("Model found in cache, using this")
+        trained_model = CACHED_MODEL
+    else:
+        logging.info(f"Model not found in cache, loading from {model_location}")
+        trained_model = load_mlflow_model(model_location)
+        CACHED_MODEL = trained_model
+        logging.info(f"Model loaded successfully")
 
     payload_from_param = req.params.get("payload")
     if payload_from_param:
