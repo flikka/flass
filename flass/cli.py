@@ -49,6 +49,9 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset, lime, run_name)
     with mlflow.start_run(run_name=run_name):
         logger.info(f"Artifact URI: {mlflow.get_artifact_uri()}")
         logger.info(f"Tracking URI: {mlflow.get_tracking_uri()}")
+
+        mlflow.log_param("dataset", dataset)
+        mlflow.log_param("class_names", json.dumps(class_names))
         mlflow.log_param("batch_size", batch_size)
         mlflow.log_param("epochs", epochs)
         mlflow.log_param("num_train_instances", len(x_train))
@@ -62,6 +65,7 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset, lime, run_name)
         )
 
         trained_model.log_model(trained_model, "saved-model")
+
         model_location = mlflow.get_artifact_uri("saved-model")
         logger.info(f"Loading model from: {model_location}")
 
@@ -106,6 +110,14 @@ def flass(plot, batch_size, epochs, dataset, model_type, subset, lime, run_name)
                     mlflow.log_metric(f"{key}-{metric}", report[key][metric])
             else:
                 mlflow.log_metric(f"{key}", report[key])
+
+        mlflow_last_run = mlflow.active_run().info.run_id
+        print(mlflow_last_run)
+        with open("mlflow_last_run.txt", "w") as file:
+            file.write(mlflow_last_run)
+            logger.info(
+                f"Wrote last MLFlow run id {mlflow_last_run} to mlflow_last_run.txt"
+            )
 
     if plot:
         plot_incorrect(x_test, y_test, y_predicted, class_names)
