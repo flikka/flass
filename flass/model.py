@@ -6,7 +6,6 @@ import mlflow.keras
 import mlflow.sklearn
 import numpy as np
 
-from skimage.color import gray2rgb
 from sklearn.pipeline import Pipeline
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn import svm
@@ -42,7 +41,7 @@ def conv_model():
             strides=(1, 1),
             padding="valid",
             activation="relu",
-            input_shape=(28, 28, 3),  # All important images are 28 pixels
+            input_shape=(28, 28, 1),  # All important images are 28 pixels
         )
     )
 
@@ -88,9 +87,8 @@ def get_data(data_key, subset=-1):
         raise ValueError(f"Unsupported value for 'data_key': {data_key}")
 
     ((x_train, y_train), (x_test, y_test)), class_names = data_classes
-
-    x_train = np.array([gray2rgb(grayimg) for grayimg in x_train])
-    x_test = np.array([gray2rgb(grayimg) for grayimg in x_test])
+    x_train = np.expand_dims(x_train, -1)
+    x_test = np.expand_dims(x_test, -1)
 
     if subset != -1:
         x_train = x_train[:subset]
