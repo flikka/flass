@@ -30,6 +30,7 @@ def make_sidebar(mlflow_run, class_names):
 
 
 def flasslit(mlflowrun: str):
+    st.set_option('deprecation.showfileUploaderEncoding', False)
     mlflow_run = mlflow.get_run(mlflowrun)
     class_names = json.loads(mlflow_run.data.params.get("class_names"))
     modelpath = os.path.join(mlflow_run.info.artifact_uri, "saved-model")
